@@ -62,24 +62,6 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          livenessProbe:
-            exec:
-              command:
-              - docker
-              - -H 
-              - tcp://127.0.0.1:2375
-              - images
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          readinessProbe:
-            exec:
-              command:
-              - docker
-              - -H 
-              - tcp://127.0.0.1:2375
-              - images
-            initialDelaySeconds: 5
-            periodSeconds: 5
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
