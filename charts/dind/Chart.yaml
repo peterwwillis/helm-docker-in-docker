@@ -1,0 +1,16 @@
+apiVersion: v2
+name: dind
+description: A Helm chart to deploy Docker-in-Docker (dind)
+type: application
+version: 0.0.1
+appVersion: "24.0.2-dind"
+kubeVersion: "^1.13.0-0"
+home: https://hub.docker.com/_/docker
+icon: https://raw.githubusercontent.com/docker-library/docs/c350af05d3fac7b5c3f6327ac82fe4d990d8729c/docker/logo.png
+keywords:
+  - docker
+#sources:
+#  - https://
+maintainers:
+  - name: Peter W
+#    email: foo@bar
