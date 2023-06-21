@@ -9,11 +9,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ include "dind.servicePort" . }}
-    {{- if .Values.service.targetPort }}
-      targetPort: {{ .Values.service.targetPort }}
-    {{- else }}
       targetPort: {{ include "dind.dockerPort" . }}
-    {{- end }}
       protocol: TCP
       name: docker
   selector:

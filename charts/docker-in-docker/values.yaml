@@ -96,12 +96,8 @@ securityContext: {}
 service:
   enabled: true
   type: ClusterIP
-  # The following two ports can be optionally overrided,
-  # but their values are set by default depending on the
-  # value of .Values.secureDocker . Only override them
-  # here if you really want a different port.
+  # This value will override the default which is determined by .Values.secureDocker
   #port: 2376
-  #targetPort: 2376
 
 ingress:
   enabled: false
