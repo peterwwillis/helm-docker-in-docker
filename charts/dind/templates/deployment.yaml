@@ -33,8 +33,18 @@ spec:
       hostAliases:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.extraVolumes }}
       volumes:
+      {{- if .Values.secureDocker }}
+        - name: storage
+          emptyDir: {}
+        - name: certs
+          persistentVolumeClaim:
+            claimName: {{ include "dind.fullname" . }}-certs
+      {{- else }}
+        - name: storage
+          emptyDir: {}
+      {{- end }}
+      {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
@@ -51,19 +61,26 @@ spec:
                 name: {{ . }}
           {{- end }}
           env:
+          {{- if .Values.secureDocker }}
+            - name: DOCKER_TLS_CERTDIR
+              value: /certs
+          {{- end }}
           {{- if $.Values.env }}
             {{- range $key, $value := $.Values.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
           {{- end }}
-          command: 
-          {{- range .Values.dind.command }}
-            - {{ . }}
-          {{- end }}
+          {{/*
+          If we want to secure docker, don't pass any command; the entrypoint
+          script will generate and use TLS certs.
+          */}}
+          {{- if not .Values.secureDocker }}
+          command:
+            - "dockerd"
           args:
-          {{- range .Values.dind.commandArgs }}
-            - {{ . }}
+            - "--host"
+            - "tcp://0.0.0.0:2375"
           {{- end }}
           {{- with .Values.dind.securityContext }}
           securityContext:
@@ -73,8 +90,15 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.dind.extraVolumeMounts }}
           volumeMounts:
+            - name: storage
+              mountPath: /var/lib/docker
+              subPath: docker
+          {{- if .Values.secureDocker }}
+            - name: certs
+              mountPath: /certs
+          {{- end }}
+          {{- with .Values.dind.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
 
@@ -87,6 +111,12 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
+            - name: DOCKER_HOST
+              value: tcp://127.0.0.1:{{ include "dind.dockerPort" . }}
+          {{- if .Values.secureDocker }}
+            - name: DOCKER_TLS_CERTDIR
+              value: /certs
+          {{- end }}
           {{- if $.Values.gc.env }}
             {{- range $key, $value := $.Values.gc.env }}
             - name: {{ $key }}
@@ -97,8 +127,13 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.gc.extraVolumeMounts }}
           volumeMounts:
+          {{- if .Values.secureDocker }}
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+          {{- end }}
+          {{- with .Values.gc.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
         {{- end }}

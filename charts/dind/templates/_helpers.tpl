@@ -63,3 +63,11 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "dind.dockerPort" -}}
+{{- if .Values.secureDocker -}}
+2376
+{{- else -}}
+2375
+{{- end -}}
+{{- end -}}

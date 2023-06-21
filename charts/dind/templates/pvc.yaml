@@ -1,0 +1,17 @@
+{{- if .Values.secureDocker }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "dind.fullname" . }}-certs
+  labels:
+    {{- include "dind.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 10Mi
+  storageClassName: standard
+{{- end }}
