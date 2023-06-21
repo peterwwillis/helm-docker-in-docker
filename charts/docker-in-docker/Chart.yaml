@@ -1,5 +1,5 @@
 apiVersion: v2
-name: dind
+name: docker-in-docker
 description: A Helm chart to deploy Docker-in-Docker (dind)
 type: application
 version: 0.0.1
@@ -9,8 +9,8 @@ home: https://hub.docker.com/_/docker
 icon: https://raw.githubusercontent.com/docker-library/docs/c350af05d3fac7b5c3f6327ac82fe4d990d8729c/docker/logo.png
 keywords:
   - docker
-#sources:
-#  - https://
+sources:
+  - https://github.com/peterwwillis/helm-docker-in-docker
 maintainers:
-  - name: Peter W
-#    email: foo@bar
+  - name: Peter Willis
+    email: 31324861+peterwwillis@users.noreply.github.com
