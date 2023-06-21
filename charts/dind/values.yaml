@@ -1,3 +1,5 @@
+secureDocker: true
+
 # -- Mapping between IP and hostnames that will be injected as entries in the pod's hosts files
 # https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
 hostAliases: []
@@ -14,6 +16,8 @@ replicaCount: 1
 extraVolumes:
   - name: storage
     emptyDir: {}
+  - name: certs
+    emptyDir: {}
 
 ## Values used only for dind container
 dind:
@@ -21,13 +25,14 @@ dind:
   repository: docker
   tag: 24.0.2-dind
   pullPolicy: IfNotPresent
-  command:
-    - "dockerd"
-  commandArgs:
-    - "--host"
-    - "tcp://0.0.0.0:2375"
+  #command:
+  #  - "dockerd"
+  #commandArgs:
+  #  - "--host"
+  #  - "tcp://0.0.0.0:2376"
   securityContext:
     privileged: true
+
   ## If you have declared extra volumes, mount them here, per the Pod Container's
   ## "volumeMounts" section of dind container
   ##
@@ -35,6 +40,9 @@ dind:
     - name: storage
       mountPath: /var/lib/docker
       subPath: docker
+    - name: certs
+      mountPath: /certs
+
   resources:
     {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -65,6 +73,7 @@ gc:
     GC_IGNORE_CONTAINERS: ""
     GC_INTERVAL: "5m"
     GC_CACHE: "5gb"
+    DOCKER_HOST: "tcp://127.0.0.1:2376"
   resources:
     {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -77,6 +86,10 @@ gc:
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
+  extraVolumeMounts:
+    - name: certs
+      readOnly: true
+      mountPath: /certs
 
 imagePullSecrets: []
 
@@ -114,8 +127,8 @@ securityContext:
 
 service:
   type: ClusterIP
-  port: 2375
-  targetPort: 2375
+  port: 2376
+  targetPort: 2376
 
 ingress:
   enabled: false
@@ -160,6 +173,9 @@ tolerations: []
 
 affinity: {}
 
+env:
+  DOCKER_TLS_CERTDIR: /certs
+
 ## If you'd like to provide your own Kubernetes Secret object instead of passing your values
 ## in un-encrypted, pass in the name of a created + populated Secret in the same Namespace
 ## as the Docker runner. All secrets within this configmap will be mounted as environment
@@ -168,5 +184,3 @@ affinity: {}
 extraSecretNamesForEnvFrom: []
 # - my-secrets
 
-env:
-  DOCKER_HOST: "tcp://127.0.0.1:2375"
