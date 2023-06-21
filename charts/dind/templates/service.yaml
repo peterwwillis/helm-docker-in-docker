@@ -8,11 +8,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    {{- if .Values.service.port }}
-    - port: {{ .Values.service.port }}
-    {{- else }}
-    - port: {{ include "dind.dockerPort" . }}
-    {{- end }}
+    - port: {{ include "dind.servicePort" . }}
     {{- if .Values.service.targetPort }}
       targetPort: {{ .Values.service.targetPort }}
     {{- else }}

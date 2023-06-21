@@ -71,3 +71,11 @@ Create the name of the service account to use
 2375
 {{- end -}}
 {{- end -}}
+
+{{- define "dind.servicePort" -}}
+{{- if .Values.service.port -}}
+{{- .Values.service.port -}}
+{{- else -}}
+{{ include "dind.dockerPort" . -}}
+{{- end -}}
+{{- end -}}

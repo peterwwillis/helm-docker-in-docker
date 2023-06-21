@@ -37,9 +37,12 @@ spec:
       {{- if .Values.secureDocker }}
         - name: storage
           emptyDir: {}
-        - name: certs
-          persistentVolumeClaim:
-            claimName: {{ include "dind.fullname" . }}-certs
+        - name: client-certs
+          secret:
+            secretName: {{ include "dind.fullname" . }}-cert-client
+        - name: server-certs
+          secret:
+            secretName: {{ include "dind.fullname" . }}-cert-server
       {{- else }}
         - name: storage
           emptyDir: {}
@@ -95,8 +98,30 @@ spec:
               mountPath: /var/lib/docker
               subPath: docker
           {{- if .Values.secureDocker }}
-            - name: certs
-              mountPath: /certs
+            - name: client-certs
+              mountPath: /certs/client/ca.pem
+              subPath: ca.crt
+              readOnly: true
+            - name: client-certs
+              mountPath: /certs/client/cert.pem
+              subPath: tls.crt
+              readOnly: true
+            - name: client-certs
+              mountPath: /certs/client/key.pem
+              subPath: tls.key
+              readOnly: true
+            - name: server-certs
+              mountPath: /certs/server/ca.pem
+              subPath: ca.crt
+              readOnly: true
+            - name: server-certs
+              mountPath: /certs/server/cert.pem
+              subPath: tls.crt
+              readOnly: true
+            - name: server-certs
+              mountPath: /certs/server/key.pem
+              subPath: tls.key
+              readOnly: true
           {{- end }}
           {{- with .Values.dind.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -116,6 +141,10 @@ spec:
           {{- if .Values.secureDocker }}
             - name: DOCKER_TLS_CERTDIR
               value: /certs
+            - name: DOCKER_CERT_PATH
+              value: /certs/client
+            - name: DOCKER_TLS_VERIFY
+              value: "1"
           {{- end }}
           {{- if $.Values.gc.env }}
             {{- range $key, $value := $.Values.gc.env }}
@@ -129,8 +158,17 @@ spec:
           {{- end }}
           volumeMounts:
           {{- if .Values.secureDocker }}
-            - name: certs
-              mountPath: /certs
+            - name: client-certs
+              mountPath: /certs/client/ca.pem
+              subPath: ca.crt
+              readOnly: true
+            - name: client-certs
+              mountPath: /certs/client/cert.pem
+              subPath: tls.crt
+              readOnly: true
+            - name: client-certs
+              mountPath: /certs/client/key.pem
+              subPath: tls.key
               readOnly: true
           {{- end }}
           {{- with .Values.gc.extraVolumeMounts }}
