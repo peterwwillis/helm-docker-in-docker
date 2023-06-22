@@ -40,6 +40,9 @@ jobs:
       ### Begin updating index
       - name: Update index.yaml
         run: |
+            cd "$GITHUB_WORKSPACE"
+            mkdir -p cr-index
+            cd cr-index
             owner="$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY")"
             repo="$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY")"
             version="v1.5.0"
@@ -55,14 +58,14 @@ jobs:
         uses: ldeluigi/markdown-docs@latest
         with:
           src: ./charts/docker-in-docker
-          dst: .
+          dst: html
 
       - name: Deploy to GitHub Pages
         if: success()
         uses: crazy-max/ghaction-github-pages@v3
         with:
           target_branch: gh-pages
-          build_dir: .
+          build_dir: html
           keep_history: "true"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
