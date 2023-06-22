@@ -1,0 +1,141 @@
+# If this is true, Docker will generate TLS certs on startup and create a volume
+# to store the certs in. Connecting services should mount that volume to be able
+# to connect to Docker.
+# If false, Docker is started and will listen on an insecure open port.
+secureDocker: true
+
+# Mapping between IP and hostnames that will be injected as entries in the pod's hosts files
+# https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+hostAliases: []
+# - ip: 10.20.30.40
+#   hostnames:
+#   - gitea-127.0.0.1.sslip.io
+
+replicaCount: 1
+
+#extraVolumes:
+# - name: foo
+#   emptyDir: {}
+
+# Values used only for dind container
+dind:
+  registry: docker.io
+  repository: docker
+  tag: 24.0.2-dind
+  pullPolicy: IfNotPresent
+  securityContext:
+    privileged: true
+
+  #extraVolumeMounts:
+
+  resources: {}
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+
+# Values used only for the Drone Garbage Collector container
+gc:
+  enabled: true
+  registry: docker.io
+  repository: drone/gc
+  tag: 1.0.0
+  pullPolicy: IfNotPresent
+  securityContext: {}
+  env:
+    GC_DEBUG: false
+    GC_DEBUG_COLOR: "false"
+    GC_DEBUG_PRETTY: "false"
+    GC_IGNORE_IMAGES: ""
+    GC_IGNORE_CONTAINERS: ""
+    GC_INTERVAL: "5m"
+    GC_CACHE: "5gb"
+  #extraVolumeMounts:
+  resources: {}
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+
+imagePullSecrets: []
+
+## When the runner receives a SIGTERM/SIGINT (config update, upgrade, etc), it will wait until
+## all jobs that particular pod has spawned complete. It is for this reason that you'll want
+## to make sure that this value is longer than your longest job.
+terminationGracePeriodSeconds: 3600
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+#   fsGroup: 2000
+
+securityContext: {}
+#   capabilities:
+#     drop:
+#     - ALL
+#   readOnlyRootFilesystem: true
+#   runAsNonRoot: true
+#   runAsUser: 1000
+
+service:
+  enabled: true
+  type: ClusterIP
+  # This value will override the default which is determined by .Values.secureDocker
+  #port: 2376
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  #   kubernetes.io/ingress.class: nginx
+  #   kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+#   limits:
+#     cpu: 100m
+#     memory: 128Mi
+#   requests:
+#     cpu: 100m
+#     memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+extraSecretNamesForEnvFrom: []
+# - my-secrets
+
