@@ -26,7 +26,6 @@ jobs:
           git config user.name "Peter W"
           git config user.email "31324861+peterwwillis@users.noreply.github.com"
 
-      ### Begin releasing
       - name: Install Helm
         uses: azure/setup-helm@v3
         env:
@@ -37,28 +36,16 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      ### Begin updating index
-      - name: Update index.yaml
-        run: |
-            cd "$GITHUB_WORKSPACE"
-            mkdir -p cr-index
-            cd cr-index
-            owner="$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY")"
-            repo="$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY")"
-            version="v1.5.0"
-            curl -sSLo /tmp/cr.tar.gz "https://github.com/helm/chart-releaser/releases/download/$version/chart-releaser_${version#v}_linux_amd64.tar.gz"
-            tar -xzf /tmp/cr.tar.gz -C "/usr/local/bin"
-            rm -f /tmp/cr.tar.gz
-            /usr/local/bin/cr index -o "$owner" -r "$repo" --push
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      ### Begin publishing HTML
       - name: Generate HTML from Markdown
         uses: ldeluigi/markdown-docs@latest
         with:
           src: ./charts/docker-in-docker
           dst: html
+
+      - name: Update index.yaml in published dir
+        run: |
+            git fetch --all --tags
+            git show remotes/origin/gh-pages:index.yaml > html/index.yaml
 
       - name: Deploy to GitHub Pages
         if: success()
