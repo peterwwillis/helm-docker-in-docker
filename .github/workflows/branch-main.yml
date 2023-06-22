@@ -48,14 +48,6 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Install chart-releaser
-        uses: helm/chart-releaser-action@v1.5.0
-        with:
-          install_only: "true"
-          install_dir: "/usr/local/bin"
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
         env:
@@ -64,8 +56,12 @@ jobs:
       ### Begin updating index
       - name: Update index.yaml
         run: |
-            owner=$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY")
-            repo=$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY")
+            owner="$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY")"
+            repo="$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY")"
+            version="v1.5.0"
+            curl -sSLo /tmp/cr.tar.gz "https://github.com/helm/chart-releaser/releases/download/$version/chart-releaser_${version#v}_linux_amd64.tar.gz"
+            tar -xzf /tmp/cr.tar.gz -C "/usr/local/bin"
+            rm -f /tmp/cr.tar.gz
             /usr/local/bin/cr index --owner "$owner" --repo "$repo" --push
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
