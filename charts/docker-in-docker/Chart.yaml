@@ -2,7 +2,7 @@ apiVersion: v2
 name: docker-in-docker
 description: A Helm chart to deploy Docker-in-Docker (dind)
 type: application
-version: 0.0.2
+version: 0.0.3
 appVersion: "24.0.2-dind"
 kubeVersion: "^1.13.0-0"
 home: https://hub.docker.com/_/docker
