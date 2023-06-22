@@ -62,7 +62,7 @@ jobs:
             curl -sSLo /tmp/cr.tar.gz "https://github.com/helm/chart-releaser/releases/download/$version/chart-releaser_${version#v}_linux_amd64.tar.gz"
             tar -xzf /tmp/cr.tar.gz -C "/usr/local/bin"
             rm -f /tmp/cr.tar.gz
-            /usr/local/bin/cr index --owner "$owner" --repo "$repo" --push
+            /usr/local/bin/cr index -o "$owner" -r "$repo" --push
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
