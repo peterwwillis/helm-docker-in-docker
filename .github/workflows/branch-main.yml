@@ -16,7 +16,6 @@ jobs:
 
     steps:
 
-      ### Begin publishing HTML
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -26,21 +25,6 @@ jobs:
         run: |
           git config user.name "Peter W"
           git config user.email "31324861+peterwwillis@users.noreply.github.com"
-
-      - name: Generate HTML from Markdown
-        uses: ldeluigi/markdown-docs@latest
-        with:
-          src: ./charts/docker-in-docker
-          dst: public
-
-      - name: Deploy to GitHub Pages
-        if: success()
-        uses: crazy-max/ghaction-github-pages@v3
-        with:
-          target_branch: gh-pages
-          build_dir: public
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       ### Begin releasing
       - name: Install Helm
@@ -65,4 +49,21 @@ jobs:
             /usr/local/bin/cr index -o "$owner" -r "$repo" --push
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      ### Begin publishing HTML
+      - name: Generate HTML from Markdown
+        uses: ldeluigi/markdown-docs@latest
+        with:
+          src: ./charts/docker-in-docker
+          dst: .
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v3
+        with:
+          target_branch: gh-pages
+          build_dir: .
+          keep_history: "true"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
