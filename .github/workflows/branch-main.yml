@@ -5,28 +5,69 @@ on:
     branches:
       - main
 
-  workflow_dispatch:
-
-
 jobs:
 
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
 
-  publish-html:
-    permissions:
-      contents: write
-    uses: ./.github/workflows/publish-html.yml
+      ### Begin publishing HTML
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-  update-index:
-    permissions:
-      contents: write
-    uses: ./.github/workflows/update-index.yml
+      - name: Generate HTML from Markdown
+        uses: ldeluigi/markdown-docs@latest
+        with:
+          src: ./charts/docker-in-docker
+          dst: public
 
-  release:
-    permissions:
-      contents: write
-    uses: ./.github/workflows/release.yml
-  
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v3
+        with:
+          target_branch: gh-pages
+          build_dir: public
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      ### Begin releasing
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Install chart-releaser
+        uses: helm/chart-releaser-action@v1.5.0
+        with:
+          install_only: "true"
+          install_dir: "/usr/local/bin"
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.5.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      ### Begin updating index
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Update index.yaml
+        run: |
+            owner=$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY")
+            repo=$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY")
+            cr index --owner "$owner" --repo "$repo" --push
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
