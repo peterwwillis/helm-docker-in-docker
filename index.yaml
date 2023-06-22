@@ -1,0 +1,24 @@
+apiVersion: v1
+entries:
+  docker-in-docker:
+  - apiVersion: v2
+    appVersion: 24.0.2-dind
+    created: "2023-06-22T03:16:09.351292074Z"
+    description: A Helm chart to deploy Docker-in-Docker (dind)
+    digest: acdd65acd1b01b352a2a33911410c912f17ac206f0533bd3541193dc60f93f96
+    home: https://hub.docker.com/_/docker
+    icon: https://raw.githubusercontent.com/docker-library/docs/c350af05d3fac7b5c3f6327ac82fe4d990d8729c/docker/logo.png
+    keywords:
+    - docker
+    kubeVersion: ^1.13.0-0
+    maintainers:
+    - email: 31324861+peterwwillis@users.noreply.github.com
+      name: Peter Willis
+    name: docker-in-docker
+    sources:
+    - https://github.com/peterwwillis/helm-docker-in-docker
+    type: application
+    urls:
+    - https://github.com/peterwwillis/helm-docker-in-docker/releases/download/docker-in-docker-0.0.2/docker-in-docker-0.0.2.tgz
+    version: 0.0.2
+generated: "2023-06-22T03:16:09.351296674Z"
