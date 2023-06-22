@@ -121,7 +121,7 @@ $ helm uninstall "${DIND_NAME}"
 ```
 
 
-# NOTES
+## NOTES
 
  - This is not designed for production use; buyer beware.
  - You probably want to set resource limits before deploying.
@@ -129,12 +129,12 @@ $ helm uninstall "${DIND_NAME}"
  - I have not tested the HPA.
 
 
-# CREDITS
+## CREDITS
 
 Thanks to the Drone.io crew for the [basis of this chart](https://github.com/drone/charts/tree/master/charts/drone-runner-docker).
 
 
-# ERRATA
+## ERRATA
 
  - With the current secure mode, the Drone GC doesn't seem to do TLS handshakes correctly.
    I'm not sure why, but I suspect it's because Helm doesn't have a way to support the
@@ -143,7 +143,7 @@ Thanks to the Drone.io crew for the [basis of this chart](https://github.com/dro
    that fixes it.
 
 
-# LINKS
+## LINKS
  - https://docs.docker.com/engine/security/protect-access/
  - https://docs.docker.com/engine/extend/plugins_authorization/
  - https://docs.docker.com/engine/security/protect-access/#create-a-ca-server-and-client-keys-with-openssl

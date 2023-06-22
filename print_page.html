@@ -468,16 +468,16 @@ $
 <h3 id="index-uninstall-the-helm-chart">Uninstall the Helm chart</h3>
 <div class="highlight"><pre><span></span><code>$ helm uninstall &quot;${DIND_NAME}&quot;
 </code></pre></div>
-<h1 id="index-notes">NOTES</h1>
+<h2 id="index-notes">NOTES</h2>
 <ul>
 <li>This is not designed for production use; buyer beware.</li>
 <li>You probably want to set resource limits before deploying.</li>
 <li>I have not tested the Ingress. It's likely to interfere with the default TLS configuration, so you may need to disable the <code>secureDocker</code> value.</li>
 <li>I have not tested the HPA.</li>
 </ul>
-<h1 id="index-credits">CREDITS</h1>
+<h2 id="index-credits">CREDITS</h2>
 <p>Thanks to the Drone.io crew for the <a href="https://github.com/drone/charts/tree/master/charts/drone-runner-docker">basis of this chart</a>.</p>
-<h1 id="index-errata">ERRATA</h1>
+<h2 id="index-errata">ERRATA</h2>
 <ul>
 <li>With the current secure mode, the Drone GC doesn't seem to do TLS handshakes correctly.
    I'm not sure why, but I suspect it's because Helm doesn't have a way to support the
@@ -485,7 +485,7 @@ $
    You can try to re-generate the keys yourself and put them into the secrets and see if
    that fixes it.</li>
 </ul>
-<h1 id="index-links">LINKS</h1>
+<h2 id="index-links">LINKS</h2>
 <ul>
 <li>https://docs.docker.com/engine/security/protect-access/</li>
 <li>https://docs.docker.com/engine/extend/plugins_authorization/</li>
