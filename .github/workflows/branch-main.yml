@@ -44,6 +44,10 @@ jobs:
 
       - name: Update index.yaml in published dir
         run: |
+            id
+            ls -la
+            ls -la html
+            sudo id
             git fetch --all --tags
             git show remotes/origin/gh-pages:index.yaml > html/index.yaml
 
