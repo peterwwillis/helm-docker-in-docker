@@ -6,6 +6,40 @@ on:
       - main
 
 jobs:
+
+  publish-html:
+
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "Peter W"
+          git config user.email "31324861+peterwwillis@users.noreply.github.com"
+
+      - name: Generate HTML from Markdown
+        uses: ldeluigi/markdown-docs@latest
+        with:
+          src: ./charts/docker-in-docker
+          dst: public
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v3
+        with:
+          target_branch: gh-pages
+          build_dir: public
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+
   release:
 
     # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
@@ -14,6 +48,7 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -34,19 +69,4 @@ jobs:
         uses: helm/chart-releaser-action@v1.5.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Generate HTML from Markdown
-        uses: ldeluigi/markdown-docs@latest
-        with:
-          src: ./charts/docker-in-docker
-          dst: public
-
-      - name: Deploy to GitHub Pages
-        if: success()
-        uses: crazy-max/ghaction-github-pages@v3
-        with:
-          target_branch: gh-pages
-          build_dir: public
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
