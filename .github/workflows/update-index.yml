@@ -30,8 +30,11 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.5.0
+      - name: Update index.yaml
+        run: |
+            owner=$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY")
+            repo=$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY")
+            cr index --owner "$owner" --repo "$repo" --push
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
