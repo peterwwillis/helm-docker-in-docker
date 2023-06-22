@@ -12,6 +12,11 @@ jobs:
 
     steps:
 
+      - name: Configure Git
+        run: |
+          git config user.name "Peter W"
+          git config user.email "31324861+peterwwillis@users.noreply.github.com"
+
       ### Begin publishing HTML
       - name: Checkout
         uses: actions/checkout@v3
