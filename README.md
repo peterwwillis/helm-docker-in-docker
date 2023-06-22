@@ -1,3 +1,5 @@
 # helm-docker-in-docker
 
-See: [README.md](charts/docker-in-docker/README.md)
+Markdown docs: [README.md](charts/docker-in-docker/README.md)
+
+HTML docs: https://peterwwillis.github.io/helm-docker-in-docker/
