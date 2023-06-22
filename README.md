@@ -13,9 +13,53 @@ to use familiar Docker tooling to do development, without needing a Docker insta
 
 ### Install the helm chart
 
-From the root of this Git repository:
+Add the helm repo, update it, and install from it, generating a new random name for the new install.
+
+You can repleace `--generate-name` with a shorter static name (like "dind") if this is the only install in your namespace.
+
 ```
-$ helm install dind ./charts/docker-in-docker/
+$ helm repo add dind https://peterwwillis.github.io/helm-docker-in-docker/
+"dind" has been added to your repositories
+$ helm search repo dind
+NAME                 	CHART VERSION	APP VERSION	DESCRIPTION
+dind/docker-in-docker	0.0.2        	24.0.2-dind	A Helm chart to deploy Docker-in-Docker (dind)
+$ helm repo update
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "dind" chart repository
+Update Complete. ⎈Happy Helming!⎈
+$ helm install dind/docker-in-docker --generate-name
+NAME: docker-in-docker-1687405617
+LAST DEPLOYED: Wed Jun 21 23:47:01 2023
+NAMESPACE: my-namespace
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+Docker-in-Docker is deployed!
+
+To connect to the Docker daemon:
+  1. Set the following environment variables for your Docker client:
+       DOCKER_HOST=tcp://docker-in-docker-1687405617:2376
+       DOCKER_TLS_CERTDIR=/certs
+       DOCKER_CERT_PATH=/certs/client
+       DOCKER_TLS_VERIFY=1
+  2. Download the kubernetes secret 'docker-in-docker-1687405617-cert-client' and create the
+     following files for the Docker client:
+       'ca.crt' -> /certs/client/ca.pem
+       'tls.crt' -> /certs/client/cert.pem
+       'tls.key' -> /certs/client/key.pem
+  3. Use your Docker client as normal. It should automatically authenticate via TLS.
+```
+
+
+### Write down the generated service name
+
+Check the `NAME: ` line from the Helm install and fill in below at `DIND_NAME=`.
+This will make subsequent steps a little easier.
+
+```
+$ DIND_NAME=docker-in-docker-1687405617
+$ 
 ```
 
 
@@ -27,28 +71,23 @@ This assumes you are on your local machine.
 
 ```
 $ mkdir -p ~/.docker/contexts/docker-in-docker
-$ kubectl get secret dind-cert-client \
-    --template='{{index .data "ca.crt" | base64decode}}' \
-    > ~/.docker/contexts/docker-in-docker/ca.pem
-$ kubectl get secret dind-cert-client \
-    --template='{{index .data "tls.crt" | base64decode}}' \
-    > ~/.docker/contexts/docker-in-docker/cert.pem
-$ kubectl get secret dind-cert-client \
-    --template='{{index .data "tls.key" | base64decode}}' \
-    > ~/.docker/contexts/docker-in-docker/key.pem
+$ kubectl get secret "${DIND_NAME}-cert-client" --template='{{index .data "ca.crt" | base64decode}}' > ~/.docker/contexts/docker-in-docker/ca.pem
+$ kubectl get secret "${DIND_NAME}-cert-client" --template='{{index .data "tls.crt" | base64decode}}' > ~/.docker/contexts/docker-in-docker/cert.pem
+$ kubectl get secret "${DIND_NAME}-cert-client" --template='{{index .data "tls.key" | base64decode}}' > ~/.docker/contexts/docker-in-docker/key.pem
 $ chmod 0600 ~/.docker/contexts/docker-in-docker/*.pem
 ```
 
 2. If you are on your local machine, open a port-forward to the Docker service:
 
 ```
-$ kubectl port-forward service/dind 12345:docker &
+$ kubectl port-forward "service/${DIND_NAME}" 12345:docker &
 [1] 9481
 $ Forwarding from 127.0.0.1:12345 -> 2376
 Forwarding from [::1]:12345 -> 2376
 ```
 
-3. Create and configure a Docker context. If you are on a Pod in the K8s cluster, you can use `DIND_HOST=dind` and `DIND_PORT=2376`:
+3. Create and configure a Docker context.
+   (If you are on a Pod in the K8s cluster, you can use `DIND_HOST=${DIND_NAME}` and `DIND_PORT=2376`)
 
 ```
 $ DIND_HOST=localhost
@@ -75,10 +114,10 @@ $
 ```
 
 
-## Uninstall the Helm chart
+### Uninstall the Helm chart
 
 ```
-$ helm uninstall dind
+$ helm uninstall "${DIND_NAME}"
 ```
 
 

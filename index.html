@@ -299,21 +299,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#write-down-the-generated-service-name" class="md-nav__link">
+    Write down the generated service name
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#configure-your-docker-client" class="md-nav__link">
     Configure your Docker client
   </a>
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#uninstall-the-helm-chart" class="md-nav__link">
     Uninstall the Helm chart
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -389,21 +396,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#write-down-the-generated-service-name" class="md-nav__link">
+    Write down the generated service name
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#configure-your-docker-client" class="md-nav__link">
     Configure your Docker client
   </a>
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#uninstall-the-helm-chart" class="md-nav__link">
     Uninstall the Helm chart
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -435,36 +449,68 @@
 to use familiar Docker tooling to do development, without needing a Docker install on their client machines.</p>
 <h2 id="usage">USAGE</h2>
 <h3 id="install-the-helm-chart">Install the helm chart</h3>
-<p>From the root of this Git repository:
-<div class="highlight"><pre><span></span><code>$ helm install dind ./charts/docker-in-docker/
-</code></pre></div></p>
+<p>Add the helm repo, update it, and install from it, generating a new random name for the new install.</p>
+<p>You can repleace <code>--generate-name</code> with a shorter static name (like "dind") if this is the only install in your namespace.</p>
+<div class="highlight"><pre><span></span><code>$ helm repo add dind https://peterwwillis.github.io/helm-docker-in-docker/
+&quot;dind&quot; has been added to your repositories
+$ helm search repo dind
+NAME                    CHART VERSION   APP VERSION DESCRIPTION
+dind/docker-in-docker   0.0.2           24.0.2-dind A Helm chart to deploy Docker-in-Docker (dind)
+$ helm repo update
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the &quot;dind&quot; chart repository
+Update Complete. ⎈Happy Helming!⎈
+$ helm install dind/docker-in-docker --generate-name
+NAME: docker-in-docker-1687405617
+LAST DEPLOYED: Wed Jun 21 23:47:01 2023
+NAMESPACE: my-namespace
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+Docker-in-Docker is deployed!
+
+To connect to the Docker daemon:
+  1. Set the following environment variables for your Docker client:
+       DOCKER_HOST=tcp://docker-in-docker-1687405617:2376
+       DOCKER_TLS_CERTDIR=/certs
+       DOCKER_CERT_PATH=/certs/client
+       DOCKER_TLS_VERIFY=1
+  2. Download the kubernetes secret &#39;docker-in-docker-1687405617-cert-client&#39; and create the
+     following files for the Docker client:
+       &#39;ca.crt&#39; -&gt; /certs/client/ca.pem
+       &#39;tls.crt&#39; -&gt; /certs/client/cert.pem
+       &#39;tls.key&#39; -&gt; /certs/client/key.pem
+  3. Use your Docker client as normal. It should automatically authenticate via TLS.
+</code></pre></div>
+<h3 id="write-down-the-generated-service-name">Write down the generated service name</h3>
+<p>Check the <code>NAME:</code> line from the Helm install and fill in below at <code>DIND_NAME=</code>.
+This will make subsequent steps a little easier.</p>
+<div class="highlight"><pre><span></span><code>$ DIND_NAME=docker-in-docker-1687405617
+$ 
+</code></pre></div>
 <h3 id="configure-your-docker-client">Configure your Docker client</h3>
 <p>This assumes you are on your local machine.</p>
 <ol>
 <li>First download the TLS certificates from the K8s secret:</li>
 </ol>
 <div class="highlight"><pre><span></span><code>$ mkdir -p ~/.docker/contexts/docker-in-docker
-$ kubectl get secret dind-cert-client \
-    --template=&#39;{{index .data &quot;ca.crt&quot; | base64decode}}&#39; \
-    &gt; ~/.docker/contexts/docker-in-docker/ca.pem
-$ kubectl get secret dind-cert-client \
-    --template=&#39;{{index .data &quot;tls.crt&quot; | base64decode}}&#39; \
-    &gt; ~/.docker/contexts/docker-in-docker/cert.pem
-$ kubectl get secret dind-cert-client \
-    --template=&#39;{{index .data &quot;tls.key&quot; | base64decode}}&#39; \
-    &gt; ~/.docker/contexts/docker-in-docker/key.pem
+$ kubectl get secret &quot;${DIND_NAME}-cert-client&quot; --template=&#39;{{index .data &quot;ca.crt&quot; | base64decode}}&#39; &gt; ~/.docker/contexts/docker-in-docker/ca.pem
+$ kubectl get secret &quot;${DIND_NAME}-cert-client&quot; --template=&#39;{{index .data &quot;tls.crt&quot; | base64decode}}&#39; &gt; ~/.docker/contexts/docker-in-docker/cert.pem
+$ kubectl get secret &quot;${DIND_NAME}-cert-client&quot; --template=&#39;{{index .data &quot;tls.key&quot; | base64decode}}&#39; &gt; ~/.docker/contexts/docker-in-docker/key.pem
 $ chmod 0600 ~/.docker/contexts/docker-in-docker/*.pem
 </code></pre></div>
 <ol start="2">
 <li>If you are on your local machine, open a port-forward to the Docker service:</li>
 </ol>
-<div class="highlight"><pre><span></span><code>$ kubectl port-forward service/dind 12345:docker &amp;
+<div class="highlight"><pre><span></span><code>$ kubectl port-forward &quot;service/${DIND_NAME}&quot; 12345:docker &amp;
 [1] 9481
 $ Forwarding from 127.0.0.1:12345 -&gt; 2376
 Forwarding from [::1]:12345 -&gt; 2376
 </code></pre></div>
 <ol start="3">
-<li>Create and configure a Docker context. If you are on a Pod in the K8s cluster, you can use <code>DIND_HOST=dind</code> and <code>DIND_PORT=2376</code>:</li>
+<li>Create and configure a Docker context.
+   (If you are on a Pod in the K8s cluster, you can use <code>DIND_HOST=${DIND_NAME}</code> and <code>DIND_PORT=2376</code>)</li>
 </ol>
 <div class="highlight"><pre><span></span><code>$ DIND_HOST=localhost
 $ DIND_PORT=12345
@@ -487,8 +533,8 @@ Handling connection for 12345
 CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
 $ 
 </code></pre></div>
-<h2 id="uninstall-the-helm-chart">Uninstall the Helm chart</h2>
-<div class="highlight"><pre><span></span><code>$ helm uninstall dind
+<h3 id="uninstall-the-helm-chart">Uninstall the Helm chart</h3>
+<div class="highlight"><pre><span></span><code>$ helm uninstall &quot;${DIND_NAME}&quot;
 </code></pre></div>
 <h1 id="notes">NOTES</h1>
 <ul>
@@ -519,7 +565,7 @@ $
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 21, 2023 23:43:42</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 22, 2023 04:03:34</span>
       
         <br>
         Created:
